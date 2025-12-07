@@ -1,7 +1,9 @@
 <?php
 
-namespace app\models;
+namespace backend\models;
 
+use DateInterval;
+use DateTime;
 use Yii;
 use yii\base\Exception;
 
@@ -37,9 +39,16 @@ class Apple extends \yii\db\ActiveRecord
     {
         parent::afterSave($insert, $changedAttributes);
 
-        if (!$insert && isset($changedAttributes['status'])) {
-            $this->handleStatusChange($changedAttributes['status'], $this->status);
+        if (!$insert) {
+            if (isset($changedAttributes['status'])) {
+                $this->handleStatusChange($changedAttributes['status'], $this->status);
+            }
+            $this->handleRottenEvent();
+
         }
+
+
+
     }
 
     /**
@@ -49,6 +58,15 @@ class Apple extends \yii\db\ActiveRecord
     {
         if ($newStatus == self::$STATE_FELLED) {
             $this->fell_at = date('Y-m-d H:i:s');
+            $this->rotten_at = new DateTime()->add(new DateInterval('PT5H'))->format('Y-m-d H:i:s');
+            $this->save();
+        }
+    }
+
+    protected function handleRottenEvent(): void{
+        if ($this->rotten_at && $this->status != Apple::$STATE_ROTTEN && (new DateTime() >= new DateTime($this->rotten_at))){
+            $this->status = Apple::$STATE_ROTTEN;
+            $this->active = false;
             $this->save();
         }
     }
@@ -63,8 +81,8 @@ class Apple extends \yii\db\ActiveRecord
             [['status'], 'default', 'value' => 'on_tree'],
             [['eaten'], 'default', 'value' => 0],
             [['color'], 'required'],
-            [['created_at', 'updated_at', 'fell_at'], 'safe'],
-            [['eaten'], 'integer'],
+            [['created_at', 'updated_at', 'fell_at', 'rotten_at'], 'safe'],
+            [['eaten', 'active'], 'integer'],
             [['color', 'status'], 'string', 'max' => 255],
         ];
     }
@@ -85,9 +103,16 @@ class Apple extends \yii\db\ActiveRecord
         ];
     }
 
-
-    public function fellToGround(){
-
+    /**
+     * @throws Exception
+     */
+    public function setColor(?string $color = null, bool $randomize = true): void
+    {
+        if (!$randomize and is_null($color)) {
+            throw new Exception('Color cannot be null or empty. if randomize is false, set this color');
+        }
+        $colors = ['red', 'green', 'yellow'];
+        $this->color = $randomize ? $colors[array_rand($colors)] : $color;
     }
 
     /**

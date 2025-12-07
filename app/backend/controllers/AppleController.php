@@ -2,14 +2,21 @@
 
 namespace backend\controllers;
 
-use app\models\Apple;
+
+use backend\models\Apple;
+use yii\base\Exception;
 use yii\web\Controller;
 
 class AppleController extends Controller
 {
-    public function actionIndex(){
+    /**
+     * @throws Exception
+     * @throws \yii\db\Exception
+     */
+    public function actionIndex(): false|string
+    {
         $apple = new Apple();
-        $apple->color = 'red';
+        $apple->setColor();
         $apple->save();
         $ret = ['apple_old'=>[...$apple->toArray(), 'size'=>$apple->size]];
         $apple->status = Apple::$STATE_FELLED;
