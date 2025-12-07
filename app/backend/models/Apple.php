@@ -21,12 +21,36 @@ class Apple extends \yii\db\ActiveRecord
     public static string $STATE_ON_TREE = 'on_tree';
     public static string $STATE_FELLED = 'felled';
     public static string $STATE_ROTTEN = 'rotten';
+
     /**
      * {@inheritdoc}
      */
     public static function tableName(): string
     {
         return 'apple';
+    }
+
+    /**
+     * @throws \yii\db\Exception
+     */
+    public function afterSave($insert, $changedAttributes): void
+    {
+        parent::afterSave($insert, $changedAttributes);
+
+        if (!$insert && isset($changedAttributes['status'])) {
+            $this->handleStatusChange($changedAttributes['status'], $this->status);
+        }
+    }
+
+    /**
+     * @throws \yii\db\Exception
+     */
+    protected function handleStatusChange(string $oldStatus, string $newStatus): void
+    {
+        if ($newStatus == self::$STATE_FELLED) {
+            $this->fell_at = date('Y-m-d H:i:s');
+            $this->save();
+        }
     }
 
     /**

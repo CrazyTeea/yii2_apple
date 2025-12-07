@@ -18,7 +18,7 @@ class SiteController extends Controller
     /**
      * {@inheritdoc}
      */
-    public function behaviors()
+    public function behaviors(): array
     {
         return [
             'access' => [
@@ -47,7 +47,7 @@ class SiteController extends Controller
     /**
      * {@inheritdoc}
      */
-    public function actions()
+    public function actions(): array
     {
         return [
             'error' => [
@@ -61,7 +61,7 @@ class SiteController extends Controller
      *
      * @return string
      */
-    public function actionIndex()
+    public function actionIndex(): string
     {
         return $this->render('index');
     }
@@ -71,7 +71,7 @@ class SiteController extends Controller
      *
      * @return string|Response
      */
-    public function actionLogin()
+    public function actionLogin(): Response|string
     {
         if (!Yii::$app->user->isGuest) {
             return $this->goHome();
@@ -84,10 +84,6 @@ class SiteController extends Controller
 
             return $this->goBack();
         }
-        $user = User::findByUsername($model->username);
-
-        var_dump(crypt($model->password, $user->password_hash ) == $user->password_hash);die();
-        $model->password = '';
 
         return $this->render('login', [
             'model' => $model,
@@ -99,7 +95,7 @@ class SiteController extends Controller
      *
      * @return Response
      */
-    public function actionLogout()
+    public function actionLogout(): Response
     {
         Yii::$app->user->logout();
 
