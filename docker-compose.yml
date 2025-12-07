@@ -1,0 +1,41 @@
+services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./app:/var/www/html
+      - ./nginx/conf:/etc/nginx/conf.d
+      - ./nginx/logs:/var/log/nginx
+    depends_on:
+      - php
+    networks:
+      - yii-network
+  php:
+    build:
+      dockerfile: docker/Dockerfile
+    volumes:
+      - ./app:/var/www/html
+      - ./php/conf:/usr/local/etc/php/conf.d/yii
+      - ./php/logs:/var/log/php
+    environment:
+      - COMPOSER_ALLOW_SUPERUSER=1
+    networks:
+      - yii-network
+  mysql:
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: yii2user
+      MYSQL_DATABASE: yii2advanced
+      MYSQL_USER: yii2user
+      MYSQL_PASSWORD: yii2user
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql:/var/lib/mysql
+    networks:
+      - yii-network
+networks:
+  yii-network:
+    driver: bridge
