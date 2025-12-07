@@ -35,6 +35,12 @@ class Apple extends ActiveRecord
         return 'apple';
     }
 
+    public function fall()
+    {
+        $this->status = self::$STATE_FELLED;
+        $this->save();
+    }
+
     /**
      * @throws \yii\db\Exception|DateMalformedStringException
      */
@@ -52,6 +58,11 @@ class Apple extends ActiveRecord
 
 
 
+    }
+
+    public static function allActive(): \yii\db\ActiveQuery
+    {
+        return static::find()->where(['active' => true]);
     }
 
     /**
@@ -101,13 +112,20 @@ class Apple extends ActiveRecord
     {
         return [
             'id' => 'ID',
-            'color' => 'Color',
-            'created_at' => 'Created At',
-            'updated_at' => 'Updated At',
-            'fell_at' => 'Fell At',
-            'status' => 'Status',
-            'eaten' => 'Eaten',
+            'color' => 'Цвет',
+            'created_at' => 'Создан',
+            'updated_at' => 'Обновлен',
+            'fell_at' => 'Упало в',
+            'status' => 'Статус',
+            'eaten' => 'Съедено',
+            'size' => 'Размер'
         ];
+    }
+
+    public function safeDelete(): void
+    {
+        $this->active = false;
+        $this->save();
     }
 
     /**
