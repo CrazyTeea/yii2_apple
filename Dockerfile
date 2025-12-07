@@ -34,6 +34,7 @@ RUN apk update && apk add --no-cache \
 
 # Установка Composer
 COPY --from=composer/composer:latest-bin /composer /usr/bin/composer
+COPY php/conf/yii2.ini /usr/local/etc/php/conf.d/yii2.ini
 
 # Создание пользователя для безопасности
 ARG USER_ID=1000
