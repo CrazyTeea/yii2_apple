@@ -3,9 +3,10 @@
 namespace backend\models;
 
 use DateInterval;
+use DateMalformedStringException;
 use DateTime;
-use Yii;
 use yii\base\Exception;
+use yii\db\ActiveRecord;
 
 /**
  * This is the model class for table "apple".
@@ -15,10 +16,12 @@ use yii\base\Exception;
  * @property string|null $created_at
  * @property string|null $updated_at
  * @property string|null $fell_at
+ * @property string|null $rotten_at
  * @property string $status
+ * @property bool $active
  * @property int $eaten
  */
-class Apple extends \yii\db\ActiveRecord
+class Apple extends ActiveRecord
 {
     public static string $STATE_ON_TREE = 'on_tree';
     public static string $STATE_FELLED = 'felled';
@@ -33,7 +36,7 @@ class Apple extends \yii\db\ActiveRecord
     }
 
     /**
-     * @throws \yii\db\Exception
+     * @throws \yii\db\Exception|DateMalformedStringException
      */
     public function afterSave($insert, $changedAttributes): void
     {
@@ -63,6 +66,10 @@ class Apple extends \yii\db\ActiveRecord
         }
     }
 
+    /**
+     * @throws DateMalformedStringException
+     * @throws \yii\db\Exception
+     */
     protected function handleRottenEvent(): void{
         if ($this->rotten_at && $this->status != Apple::$STATE_ROTTEN && (new DateTime() >= new DateTime($this->rotten_at))){
             $this->status = Apple::$STATE_ROTTEN;
